@@ -109,6 +109,7 @@ export function MissionEditor({ missionId, userId, listHref }: { missionId: stri
     } catch {
       return;
     }
+    let uploaded = 0;
     for (const f of files) {
       const fd = new FormData();
       fd.set("id", f.id);
@@ -119,7 +120,10 @@ export function MissionEditor({ missionId, userId, listHref }: { missionId: stri
       fd.set("file", new File([f.data], f.filename, { type: f.mime }));
       try {
         const r = await fetch(`/api/missions/${missionId}/attachments`, { method: "POST", body: fd });
-        if (r.ok) await removePendingFile(f.id);
+        if (r.ok) {
+          await removePendingFile(f.id);
+          uploaded++;
+        }
         else if (r.status !== 401 && r.status < 500) {
           const j = await r.json().catch(() => ({}));
           setRejections((x) => [...x, `Photo « ${f.filename} » refusée : ${j.error ?? r.status}`]);
@@ -130,7 +134,8 @@ export function MissionEditor({ missionId, userId, listHref }: { missionId: stri
       }
     }
     await refreshPendingFiles();
-  }, [missionId, refreshPendingFiles]);
+    if (uploaded) await fetchServer();
+  }, [missionId, refreshPendingFiles, fetchServer]);
 
   const flush = useCallback(async () => {
     if (flushTimer.current) clearTimeout(flushTimer.current);
@@ -247,7 +252,16 @@ export function MissionEditor({ missionId, userId, listHref }: { missionId: stri
       return (server.mission as Record<string, unknown>)[key] ?? null;
     }
     const it = server.items.find((x) => x.id === itemId);
-    if (!it) return null;
+    if (!it) {
+      // Élément créé localement, pas encore connu du serveur : la référence est sa valeur de création.
+      const created = queueRef.current.find((q) => q.kind === "createItem" && q.itemId === itemId) as Extract<ClientOp, { kind: "createItem" }> | undefined;
+      if (!created) return null;
+      if (key === "label") return created.label;
+      if (key === "position") return created.position ?? null;
+      if (key === "pendingFields") return [];
+      if (key.startsWith("data.")) return created.data?.[key.slice(5)] ?? null;
+      return null;
+    }
     return key.startsWith("data.") ? (it.data[key.slice(5)] ?? null) : ((it as Record<string, unknown>)[key] ?? null);
   };
 
@@ -272,7 +286,7 @@ export function MissionEditor({ missionId, userId, listHref }: { missionId: stri
         <SyncBadge sync={sync} pending={pendingCount} lastSync={lastSync} cache={loadState === "cache"} />
         <span className="grow" />
         <Badge tone="blue">{STATUSES[m.status] ?? m.status}</Badge>
-        <span className="text-xs text-slate-500">v{m.version}{local.template ? ` · modèle « ${local.template.name} » v${local.template.version}` : ""}</span>
+        <span className="text-xs text-slate-500">dossier v{m.version}{local.template ? ` · modèle « ${local.template.name} » v${local.template.version}` : ""}</span>
         {pendingCount > 0 && navigator.onLine && <button type="button" className={btnClass("secondary", "sm")} onClick={() => flush()}>Synchroniser</button>}
       </div>
       {notice && <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{notice}</div>}
@@ -578,7 +592,12 @@ function ItemPanel(p: {
               pending={item.pendingFields.includes(f.key)}
               disabled={!editable}
               allowDictation={local.allowDictation}
-              onChange={(v) => patchItem(item.id, `data.${f.key}`, v)}
+              onChange={(v) => {
+                patchItem(item.id, `data.${f.key}`, v);
+                // Le libellé suit le champ de référence (ex. désignation) tant qu'il n'a pas été personnalisé.
+                const prev = item.data[f.key];
+                if (type.labelField === f.key && typeof v === "string" && v.trim() && (item.label === (prev ?? "") || /^.+ \d+$/.test(item.label))) patchItem(item.id, "label", v.trim().slice(0, 200));
+              }}
               onTogglePending={() => patchItem(item.id, "pendingFields", item.pendingFields.includes(f.key) ? item.pendingFields.filter((x) => x !== f.key) : [...item.pendingFields, f.key])}
             />
           ))}

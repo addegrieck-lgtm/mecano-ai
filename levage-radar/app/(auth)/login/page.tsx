@@ -12,7 +12,7 @@ export const metadata = { title: "Connexion" };
 export default async function LoginPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   if (!(await isInitialized(await getDb()))) redirect("/setup");
-  if (await getCtx()) redirect("/dashboard");
+  if (await getCtx()) redirect("/");
   return (
     <>
       <h1 className="mb-4 text-lg font-semibold">Connexion</h1>

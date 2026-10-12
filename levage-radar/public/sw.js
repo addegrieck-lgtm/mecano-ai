@@ -4,7 +4,7 @@
  *   Ces pages ne contiennent pas les données des dossiers (chargées par l'API puis chiffrées dans IndexedDB).
  * - Les réponses d'API ne sont JAMAIS mises en cache par le service worker.
  */
-const VERSION = "lr-v1";
+const VERSION = "lr-v2";
 const STATIC = `${VERSION}-static`;
 const PAGES = `${VERSION}-pages`;
 
@@ -30,7 +30,7 @@ self.addEventListener("fetch", (e) => {
         const hit = await c.match(req);
         if (hit) return hit;
         const res = await fetch(req);
-        if (res.ok) c.put(req, res.clone());
+        if (res.ok) await c.put(req, res.clone());
         return res;
       }),
     );
@@ -42,7 +42,10 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       fetch(req)
         .then((res) => {
-          if (cacheable && res.ok && !res.redirected) caches.open(PAGES).then((c) => c.put(url.pathname, res.clone()));
+          if (cacheable && res.ok && !res.redirected) {
+            const copy = res.clone(); // à cloner avant que le navigateur ne consomme le corps
+            caches.open(PAGES).then((c) => c.put(url.pathname, copy));
+          }
           return res;
         })
         .catch(async () => (await caches.match(url.pathname)) || (await caches.match("/offline.html"))),

@@ -13,7 +13,7 @@ import type { ActionResult } from "@/components/forms";
 const s = (fd: FormData, k: string) => (typeof fd.get(k) === "string" ? (fd.get(k) as string) : "");
 
 function safeNext(next: string) {
-  return next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : "/dashboard";
+  return next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : "/";
 }
 
 export async function loginAction(_: ActionResult, fd: FormData): Promise<ActionResult> {

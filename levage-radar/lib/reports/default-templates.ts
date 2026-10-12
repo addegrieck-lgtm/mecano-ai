@@ -46,7 +46,6 @@ export const LEVAGE_EXAMPLE: TemplateDefinition = {
         { key: "capacite_nominale", label: "Capacité nominale", type: "number", unit: "kg", min: 0, help: "Valeur relevée sur la plaque ou le document du constructeur." },
         { key: "localisation", label: "Localisation", type: "text" },
         { key: "infos_techniques", label: "Informations techniques utiles", type: "textarea" },
-        { key: "elements_a_verifier", label: "Éléments restant à vérifier", type: "textarea" },
       ],
     },
     {
