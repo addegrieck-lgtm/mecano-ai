@@ -187,3 +187,8 @@ export async function applyRetention(db: DB, now = new Date()) {
   }
   return purged;
 }
+
+export async function isInitialized(db: DB) {
+  const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(users);
+  return n > 0;
+}
