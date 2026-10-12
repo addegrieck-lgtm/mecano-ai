@@ -56,6 +56,8 @@ export const organizations = pgTable("organizations", {
 export type OrgSettings = {
   rolePermissions?: Record<string, string[]>;
   allowExternalAi?: boolean;
+  /** Dictée vocale du navigateur : peut transmettre l'audio au service du fabricant du navigateur. */
+  allowBrowserDictation?: boolean;
   missionStatusLabels?: Record<string, string>;
   retentionDays?: { audit?: number; archivedMissions?: number };
 };

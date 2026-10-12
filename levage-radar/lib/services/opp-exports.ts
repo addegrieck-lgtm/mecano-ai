@@ -86,7 +86,6 @@ export async function opportunitySummaryText(ctx: Ctx, id: string): Promise<stri
     "",
     "Pièces demandées / critères : consulter le règlement de consultation sur la source officielle (non collecté automatiquement).",
   ];
-  await audit(ctx, "opportunity", id, "summary_export");
   return lines.join("\n");
 }
 

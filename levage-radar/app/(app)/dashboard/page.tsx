@@ -4,7 +4,7 @@ import { dashboardStats, markOpportunitiesSeen } from "@/lib/services/opportunit
 import { isDemoView } from "@/lib/demo-server";
 import { connectorInfo } from "@/lib/connectors/registry";
 import { Alert, ButtonLink, Card, DemoBanner, Empty, PageHeader, Stat } from "@/components/ui";
-import { fmtDate, fmtDateTime } from "@/lib/format";
+import { fmtDate, fmtDateTime, isoDateIn } from "@/lib/format";
 import { REGIONS } from "@/lib/radar/geo";
 
 export const metadata = { title: "Tableau de bord" };
@@ -57,7 +57,7 @@ export default async function DashboardPage() {
         <Stat label="Détectées aujourd'hui" value={s.today} href="/radar?newSince=today" tone="blue" />
         <Stat label="Depuis votre dernière connexion" value={s.sinceLast ?? "—"} hint={s.sinceDate ? `depuis le ${fmtDate(s.sinceDate)}` : "première connexion"} href="/radar?newSince=last_visit" />
         <Stat label="Consultations actives" value={s.active} href="/radar?category=ACTIVE&open=1" tone="green" />
-        <Stat label="Échéances ≤ 7 jours" value={s.deadlines} href={`/radar?open=1&sort=deadline&deadlineTo=${new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)}`} tone={s.deadlines ? "amber" : "slate"} />
+        <Stat label="Échéances ≤ 7 jours" value={s.deadlines} href={`/radar?open=1&sort=deadline&deadlineTo=${isoDateIn(7)}`} tone={s.deadlines ? "amber" : "slate"} />
         <Stat label="Opportunités levage" value={s.levage} href="/radar?domain=LEVAGE" />
         <Stat label="Opportunités électricité" value={s.elec} href="/radar?domain=ELECTRICITE" />
         <Stat label="Forte pertinence (≥ 70)" value={s.highScore} href="/radar?open=1&minScore=70" />

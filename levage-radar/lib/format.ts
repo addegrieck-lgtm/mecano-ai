@@ -35,3 +35,8 @@ export function toDateTimeLocal(d: Date | string | null | undefined): string {
 export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
 }
+
+/** Date AAAA-MM-JJ dans n jours (pour les liens de filtres). */
+export function isoDateIn(days: number): string {
+  return new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
+}

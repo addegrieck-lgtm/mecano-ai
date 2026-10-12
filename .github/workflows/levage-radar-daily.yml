@@ -1,0 +1,35 @@
+# Tâche quotidienne LEVAGE RADAR exécutée par GitHub Actions (alternative au cron de l'hébergeur,
+# sans limite de durée d'une fonction serverless). Nécessite le secret DATABASE_URL (et SMTP_* / APP_URL pour les e-mails).
+name: levage-radar-daily
+on:
+  schedule:
+    - cron: "15 5 * * *" # 05:15 UTC chaque jour
+  workflow_dispatch: {}
+concurrency: levage-radar-daily
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: levage-radar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: levage-radar/package-lock.json
+      - run: npm ci
+      - name: Collecte, rapports, e-mails, rappels
+        run: npm run daily
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          APP_URL: ${{ secrets.APP_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          CONNECTOR_CONTACT_EMAIL: ${{ secrets.CONNECTOR_CONTACT_EMAIL }}
+          TED_COUNTRIES: ${{ vars.TED_COUNTRIES }}

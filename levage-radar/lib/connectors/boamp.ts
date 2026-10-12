@@ -2,7 +2,7 @@ import type { NoticeKind, NormalizedNotice } from "@/lib/radar/types";
 import { SEARCH_QUERIES } from "@/lib/radar/dictionaries";
 import { departmentFromPostalCode, normalizeDepartment } from "@/lib/radar/geo";
 import { asArray, CPV_RE, parseAmount, textOf, toIsoDate, toIsoDateTime, walk } from "./extract";
-import { httpJson, type HttpOptions } from "./http";
+import { HttpError, httpJson, type HttpOptions } from "./http";
 import type { Connector, ConnectorInfo, FetchParams, FetchResult } from "./types";
 
 /**
@@ -217,6 +217,8 @@ export function createBoampConnector(http: HttpOptions = {}): Connector {
             params.log(`BOAMP : ${results.length} avis (offset ${offset}, total ${data.total_count ?? "?"})`);
             if (results.length < PAGE) break;
           } catch (e) {
+            // Source injoignable (réseau, DNS, délai) dès la première requête : inutile d'insister sur les suivantes.
+            if (okQueries === 0 && !(e instanceof HttpError)) throw e;
             warnings.push(`Requête BOAMP échouée (${where.slice(0, 80)}…) : ${e instanceof Error ? e.message : String(e)}`);
             break;
           }

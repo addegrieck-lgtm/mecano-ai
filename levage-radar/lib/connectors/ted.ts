@@ -171,6 +171,8 @@ export function createTedConnector(http: HttpOptions = {}): Connector {
               page--;
               continue;
             }
+            // Source injoignable (réseau, DNS, délai) dès la première requête : inutile d'insister sur les suivantes.
+            if (okQueries === 0 && !(e instanceof HttpError)) throw e;
             warnings.push(`Requête TED échouée (${query.slice(0, 80)}…) : ${e instanceof Error ? e.message : String(e)}`);
             break;
           }

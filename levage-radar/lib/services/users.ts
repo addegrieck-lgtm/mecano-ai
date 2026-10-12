@@ -116,17 +116,18 @@ export async function resetRolePermissions(ctx: Ctx) {
   await audit(ctx, "organization", ctx.org.id, "role_permissions_reset");
 }
 
-export async function updateOrgSettings(ctx: Ctx, input: { name?: string; allowExternalAi?: boolean; auditDays?: number | null; archivedMissionDays?: number | null }) {
+export async function updateOrgSettings(ctx: Ctx, input: { name?: string; allowExternalAi?: boolean; allowBrowserDictation?: boolean; auditDays?: number | null; archivedMissionDays?: number | null }) {
   requirePerm(ctx, "settings.manage");
   const settings: OrgSettings = { ...ctx.org.settings };
   if (input.allowExternalAi !== undefined) settings.allowExternalAi = input.allowExternalAi;
+  if (input.allowBrowserDictation !== undefined) settings.allowBrowserDictation = input.allowBrowserDictation;
   if (input.auditDays !== undefined || input.archivedMissionDays !== undefined) {
     const days = (v: number | null | undefined) => (v === null || v === undefined || Number.isNaN(v) ? undefined : Math.min(Math.max(Math.round(v), 30), 3650));
     settings.retentionDays = { audit: days(input.auditDays), archivedMissions: days(input.archivedMissionDays) };
   }
   const name = input.name ? z.string().trim().min(2).max(120).parse(input.name) : undefined;
   await ctx.db.update(organizations).set({ settings, ...(name ? { name } : {}), updatedAt: new Date() }).where(eq(organizations.id, ctx.org.id));
-  await audit(ctx, "organization", ctx.org.id, "settings_update", { allowExternalAi: settings.allowExternalAi, retentionDays: settings.retentionDays, name });
+  await audit(ctx, "organization", ctx.org.id, "settings_update", { allowExternalAi: settings.allowExternalAi, allowBrowserDictation: settings.allowBrowserDictation, retentionDays: settings.retentionDays, name });
 }
 
 export const PrefsSchema = z.object({

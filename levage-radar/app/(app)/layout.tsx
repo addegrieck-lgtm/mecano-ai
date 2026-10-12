@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { LogOut } from "lucide-react";
 import { requireCtx } from "@/lib/auth/server";
 import { ROLES, type Role } from "@/lib/auth/permissions";
 import { DEMO_COOKIE, demoEnabled } from "@/lib/demo";
@@ -9,6 +8,7 @@ import { btnClass } from "@/components/ui";
 import { logoutAction } from "../(auth)/actions";
 import { toggleDemoAction } from "./shell-actions";
 import { OfflineRegister } from "@/components/app/offline-register";
+import { LogoutButton } from "@/components/app/logout-button";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await requireCtx();
@@ -29,18 +29,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="font-medium text-slate-800 dark:text-slate-100">{ctx.user.name}</div>
           <div className="text-slate-500">{ROLES[ctx.user.role as Role] ?? ctx.user.role}</div>
         </div>
-        <form action={logoutAction}>
-          <button type="submit" className={btnClass("ghost", "sm")} aria-label="Se déconnecter">
-            <LogOut size={16} /> Déconnexion
-          </button>
-        </form>
+        <LogoutButton action={logoutAction} />
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">{children}</main>
       <footer className="no-print mx-auto max-w-7xl px-6 pb-8 text-[11px] text-slate-400">
         LEVAGE RADAR — outil de préparation interne, non officiel. Les sources officielles font foi ; aucune donnée n&apos;est transmise au logiciel commercial ni à l&apos;outil officiel de rapports.
-        <form action={logoutAction} className="mt-2 lg:hidden">
-          <button type="submit" className="link">Se déconnecter ({ctx.user.name})</button>
-        </form>
+        <div className="mt-2 lg:hidden">
+          {ctx.user.name} — <LogoutButton action={logoutAction} compact />
+        </div>
       </footer>
       <OfflineRegister />
     </div>
