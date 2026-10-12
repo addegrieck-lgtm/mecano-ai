@@ -10,6 +10,8 @@ jobs:
   daily:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Ne s'exécute que si cette option est choisie (variable LEVAGE_RADAR_DAILY=github) — sinon Vercel Cron s'en charge.
+    if: ${{ vars.LEVAGE_RADAR_DAILY == 'github' }}
     defaults:
       run:
         working-directory: levage-radar
