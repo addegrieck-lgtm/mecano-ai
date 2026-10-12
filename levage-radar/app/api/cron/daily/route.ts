@@ -5,7 +5,7 @@ import { runDailyJob } from "@/lib/jobs";
 import { applyRetention } from "@/lib/services/users";
 
 // Collecte potentiellement longue : durée maximale demandée à l'hébergeur (plafonnée selon l'offre).
-export const maxDuration = 300;
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 function authorized(req: NextRequest) {
