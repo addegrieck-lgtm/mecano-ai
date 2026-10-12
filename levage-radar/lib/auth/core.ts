@@ -186,9 +186,9 @@ export async function createResetToken(db: DB, email: string): Promise<{ token: 
   return { token, userId: user.id, name: user.name, email: user.email };
 }
 
-export async function createResetTokenForUser(db: DB, userId: string): Promise<string> {
+export async function createResetTokenForUser(db: DB, userId: string, ttlMs = RESET_TTL_MS): Promise<string> {
   const token = newToken();
-  await db.insert(passwordResetTokens).values({ tokenHash: sha256(token), userId, expiresAt: new Date(Date.now() + RESET_TTL_MS) });
+  await db.insert(passwordResetTokens).values({ tokenHash: sha256(token), userId, expiresAt: new Date(Date.now() + ttlMs) });
   return token;
 }
 

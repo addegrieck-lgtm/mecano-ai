@@ -728,3 +728,25 @@ export const exportsLog = pgTable(
   },
   (t) => [index("exports_org_idx").on(t.orgId, t.createdAt)],
 );
+
+/** Opérations de synchronisation reçues (hors ligne → serveur) : garantit l'idempotence et la traçabilité. */
+export const syncOperations = pgTable(
+  "sync_operations",
+  {
+    opId: uuid("op_id").primaryKey(),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    missionId: uuid("mission_id")
+      .notNull()
+      .references(() => missions.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    kind: text("kind").notNull(),
+    /** applied | conflict | rejected */
+    status: text("status").notNull(),
+    result: jsonb("result").$type<Record<string, unknown>>().notNull().default({}),
+    clientCreatedAt: ts("client_created_at"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("sync_ops_mission_idx").on(t.missionId, t.createdAt)],
+);
