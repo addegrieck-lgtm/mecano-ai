@@ -2,17 +2,20 @@
 import path from "node:path";
 import * as schema from "../lib/db/schema";
 import type { DB } from "../lib/db";
+import { databaseUrl, preparedStatementsAllowed } from "../lib/db/url";
 
 export async function openDb(): Promise<{ db: DB; close: () => Promise<void>; migrate: () => Promise<void> }> {
   const folder = path.join(process.cwd(), "drizzle");
-  if (process.env.DATABASE_URL) {
+  if (databaseUrl()) {
     const { default: postgres } = await import("postgres");
     const { drizzle } = await import("drizzle-orm/postgres-js");
     const { migrate } = await import("drizzle-orm/postgres-js/migrator");
-    const client = postgres(process.env.DATABASE_URL, { max: 2, onnotice: () => {} });
+    const url = databaseUrl()!;
+    const client = postgres(url, { max: 2, onnotice: () => {}, prepare: preparedStatementsAllowed(url) });
     const db = drizzle(client, { schema });
     return { db: db as unknown as DB, close: () => client.end(), migrate: () => migrate(db, { migrationsFolder: folder }) };
   }
+  if (process.env.VERCEL) throw new Error("Base de données non configurée : ajoutez Neon (Vercel → Storage) ou DATABASE_URL, puis redéployez.");
   const { PGlite } = await import("@electric-sql/pglite");
   const { drizzle } = await import("drizzle-orm/pglite");
   const { migrate } = await import("drizzle-orm/pglite/migrator");

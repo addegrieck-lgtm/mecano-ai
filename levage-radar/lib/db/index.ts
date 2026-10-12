@@ -2,6 +2,7 @@ import "server-only";
 import path from "node:path";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import * as schema from "./schema";
+import { databaseUrl, preparedStatementsAllowed } from "./url";
 
 /**
  * Accès base de données.
@@ -19,13 +20,13 @@ const globalForDb = globalThis as unknown as { __levageDb?: Holder };
 const MIGRATIONS_FOLDER = path.join(process.cwd(), "drizzle");
 
 async function createHolder(): Promise<Holder> {
-  const url = process.env.DATABASE_URL;
+  const url = databaseUrl();
   if (url) {
     const { default: postgres } = await import("postgres");
     const { drizzle } = await import("drizzle-orm/postgres-js");
     const client = postgres(url, {
       max: Number(process.env.DATABASE_POOL_MAX ?? 5),
-      prepare: process.env.DATABASE_PREPARE !== "false",
+      prepare: preparedStatementsAllowed(url),
       onnotice: () => {},
     });
     const db = drizzle(client, { schema }) as unknown as DB;
@@ -37,6 +38,9 @@ async function createHolder(): Promise<Holder> {
           )
         : Promise.resolve();
     return { db, kind: "postgres", ready, close: () => client.end() };
+  }
+  if (process.env.VERCEL) {
+    throw new Error("Base de données non configurée : ajoutez une base PostgreSQL (Vercel → Storage → Neon) ou la variable DATABASE_URL, puis redéployez.");
   }
   const { PGlite } = await import("@electric-sql/pglite");
   const { drizzle } = await import("drizzle-orm/pglite");
@@ -61,7 +65,7 @@ export async function getDb(): Promise<DB> {
 }
 
 export function dbKind(): "postgres" | "pglite" {
-  return process.env.DATABASE_URL ? "postgres" : "pglite";
+  return databaseUrl() ? "postgres" : "pglite";
 }
 
 /** Tests / scripts : remplace l'instance courante. */
