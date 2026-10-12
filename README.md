@@ -1,3 +1,5 @@
+> **Nouveau — [LEVAGE RADAR](levage-radar/README.md)** : application distincte (dossier `levage-radar/`) de veille commerciale et de préparation des rapports d'inspection levage & électricité. Elle a sa propre configuration, ses dépendances et sa documentation ; MECANO AI ci-dessous est inchangé.
+
 # MECANO AI — le copilote intelligent du garage
 
 Plateforme professionnelle pour garages automobiles : **diagnostic OBD guidé par IA**, organisation **garage → équipes → mécaniciens**, **devis**, **interventions**, **planning** et **historique véhicule**. Conçue comme un SaaS multi-garage, avec un MVP qui fonctionne **à 0 €** (aucune API payante).

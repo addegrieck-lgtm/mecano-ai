@@ -1,0 +1,26 @@
+name: levage-radar-ci
+on:
+  push:
+    paths: ["levage-radar/**", ".github/workflows/levage-radar-ci.yml"]
+  pull_request:
+    paths: ["levage-radar/**"]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: levage-radar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: levage-radar/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          PGLITE_DIR: memory
