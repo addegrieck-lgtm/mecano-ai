@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Application LEVAGE RADAR : projet autonome avec sa propre configuration.
+    "levage-radar/**",
   ]),
 ]);
 
