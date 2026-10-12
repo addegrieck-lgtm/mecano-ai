@@ -12,7 +12,7 @@
 
 ## Option B — GitHub Actions (collecte sans limite de durée de fonction)
 
-Le workflow `.github/workflows/levage-radar-daily.yml` exécute `npm run daily` chaque jour (05:15 UTC) et sur demande. Secrets à créer : `DATABASE_URL`, `APP_URL`, et facultativement `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `CONNECTOR_CONTACT_EMAIL` ; variable `TED_COUNTRIES`. Le job échoue (code 2) si **toutes** les sources ont échoué, ce qui déclenche la notification GitHub. Les minutes GitHub Actions sont gratuites dans une certaine limite (dépôts privés : quota mensuel).
+Le workflow `.github/workflows/levage-radar-daily.yml` exécute `npm run daily` chaque jour (05:15 UTC) et sur demande. Pour l'activer, créez la variable de dépôt `LEVAGE_RADAR_DAILY` = `github` (sinon le workflow est ignoré). Secrets à créer : `DATABASE_URL`, `APP_URL`, et facultativement `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `CONNECTOR_CONTACT_EMAIL` ; variable `TED_COUNTRIES`. Le job échoue (code 2) si **toutes** les sources ont échoué, ce qui déclenche la notification GitHub. Les minutes GitHub Actions sont gratuites dans une certaine limite (dépôts privés : quota mensuel).
 
 N'activez qu'**une** des deux planifications (Vercel ou GitHub), ou acceptez une double exécution (sans danger : déduplication et curseurs incrémentaux).
 
